@@ -35,19 +35,24 @@ def createDataSet():
     return group, labels
 
 def file2matrix(filename):
+    love_dictionary={'largeDoses':3, 'smallDoses':2, 'didntLike':1}
     fr = open(filename)
-    numberOfLines = len(fr.readlines())         #get the number of lines in the file
+    arrayOLines = fr.readlines()
+    numberOfLines = len(arrayOLines)            #get the number of lines in the file
     returnMat = zeros((numberOfLines,3))        #prepare matrix to return
     classLabelVector = []                       #prepare labels return   
-    fr = open(filename)
     index = 0
-    for line in fr.readlines():
+    for line in arrayOLines:
         line = line.strip()
         listFromLine = line.split('\t')
         returnMat[index,:] = listFromLine[0:3]
-        classLabelVector.append(int(listFromLine[-1]))
+        if(listFromLine[-1].isdigit()):
+            classLabelVector.append(int(listFromLine[-1]))
+        else:
+            classLabelVector.append(love_dictionary.get(listFromLine[-1]))
         index += 1
     return returnMat,classLabelVector
+
     
 def autoNorm(dataSet):
     minVals = dataSet.min(0)
@@ -72,6 +77,19 @@ def datingClassTest():
         if (classifierResult != datingLabels[i]): errorCount += 1.0
     print "the total error rate is: %f" % (errorCount/float(numTestVecs))
     print errorCount
+    
+def classifyPerson():
+    resultList = ['not at all', 'in small doses', 'in large doses']
+    percentTats = float(raw_input(\
+                                  "percentage of time spent playing video games?"))
+    ffMiles = float(raw_input("frequent flier miles earned per year?"))
+    iceCream = float(raw_input("liters of ice cream consumed per year?"))
+    datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
+    normMat, ranges, minVals = autoNorm(datingDataMat)
+    inArr = array([ffMiles, percentTats, iceCream, ])
+    classifierResult = classify0((inArr - \
+                                  minVals)/ranges, normMat, datingLabels, 3)
+    print "You will probably like this person: %s" % resultList[classifierResult - 1]
     
 def img2vector(filename):
     returnVect = zeros((1,1024))
