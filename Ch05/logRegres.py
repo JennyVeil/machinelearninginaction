@@ -1,3 +1,4 @@
+#coding=utf-8
 '''
 Created on Oct 27, 2010
 Logistic Regression Working Module
@@ -22,14 +23,17 @@ def gradAscent(dataMatIn, classLabels):
     labelMat = mat(classLabels).transpose() #convert to NumPy matrix
     m,n = shape(dataMatrix)
     alpha = 0.001
+    # 设置迭代次数
     maxCycles = 500
+    # 权重初始化为 1（可以理解为w0=1,w1=1,w2=1）
     weights = ones((n,1))
     for k in range(maxCycles):              #heavy on matrix operations
         h = sigmoid(dataMatrix*weights)     #matrix mult
         # print(h)
         # error 是真实类别与预测类别的差值
         error = (labelMat - h)              #vector subtraction
-        # 按照差值方向调整回归洗漱
+        # 按照差值方向调整回归系数
+        # 从推论上来看，dataMatrix.transpose()* error  就应该是梯度方向
         weights = weights + alpha * dataMatrix.transpose()* error #matrix mult
     return weights
 
@@ -56,11 +60,17 @@ def plotBestFit(weights):
     plt.show()
 
 def stocGradAscent0(dataMatrix, classLabels):
+    """
+    随机梯度上升
+    """
     m,n = shape(dataMatrix)
     alpha = 0.01
     weights = ones(n)   #initialize to all ones
-    for i in range(m):
+    # 迭代 m 次，一共有 m 个样例
+    for i in range(int(m)):
+        # 计算单个样本的预测值
         h = sigmoid(sum(dataMatrix[i]*weights))
+        # 计算的单个样本的标签和预测值之间的差值
         error = classLabels[i] - h
         weights = weights + alpha * error * dataMatrix[i]
     return weights
