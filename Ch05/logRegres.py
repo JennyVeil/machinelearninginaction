@@ -26,7 +26,10 @@ def gradAscent(dataMatIn, classLabels):
     weights = ones((n,1))
     for k in range(maxCycles):              #heavy on matrix operations
         h = sigmoid(dataMatrix*weights)     #matrix mult
+        # print(h)
+        # error 是真实类别与预测类别的差值
         error = (labelMat - h)              #vector subtraction
+        # 按照差值方向调整回归洗漱
         weights = weights + alpha * dataMatrix.transpose()* error #matrix mult
     return weights
 
@@ -110,4 +113,9 @@ def multiTest():
     for k in range(numTests):
         errorSum += colicTest()
     print "after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests))
-        
+
+
+if __name__ == "__main__":
+    dataMatIn, classLabels =  loadDataSet()
+    weights = gradAscent(dataMatIn, classLabels)
+    print(weights)
