@@ -17,10 +17,17 @@ def createDataSet():
     return dataSet, labels
 
 def calcShannonEnt(dataSet):
+    """
+    计算香农熵
+    """
+    # 计算有多少个样本
     numEntries = len(dataSet)
     labelCounts = {}
+    # 遍历每个样本
     for featVec in dataSet: #the the number of unique elements and their occurance
+        # 得到这个样本的标签
         currentLabel = featVec[-1]
+        # 标签不在子集中
         if currentLabel not in labelCounts.keys(): labelCounts[currentLabel] = 0
         labelCounts[currentLabel] += 1
     shannonEnt = 0.0
@@ -30,9 +37,16 @@ def calcShannonEnt(dataSet):
     return shannonEnt
     
 def splitDataSet(dataSet, axis, value):
+    """
+    划分数据集
+    dataSet: 要划分的数据集
+    axis: 依据的特征
+    """
     retDataSet = []
+    # 遍历每个样本
     for featVec in dataSet:
         if featVec[axis] == value:
+            # 去掉划分数据用的 axis 特征列
             reducedFeatVec = featVec[:axis]     #chop out axis used for splitting
             reducedFeatVec.extend(featVec[axis+1:])
             retDataSet.append(reducedFeatVec)
@@ -65,30 +79,46 @@ def majorityCnt(classList):
     return sortedClassCount[0][0]
 
 def createTree(dataSet,labels):
+    # 提取所有样例的标签
     classList = [example[-1] for example in dataSet]
+    # 递归结束条件1：当前结点的所有样例的标签都相同
     if classList.count(classList[0]) == len(classList): 
         return classList[0]#stop splitting when all of the classes are equal
+    # 递归结束条件2：所有的特征都用完了
     if len(dataSet[0]) == 1: #stop splitting when there are no more features in dataSet
         return majorityCnt(classList)
+    # 选出最好的特征
     bestFeat = chooseBestFeatureToSplit(dataSet)
     bestFeatLabel = labels[bestFeat]
+    # 创建根结点
     myTree = {bestFeatLabel:{}}
+    # 删掉已用的特征
     del(labels[bestFeat])
+    # 得到对应的特征的所有取值的集合
     featValues = [example[bestFeat] for example in dataSet]
     uniqueVals = set(featValues)
+    # 遍历对应特征的所有取值
     for value in uniqueVals:
         subLabels = labels[:]       #copy all of labels, so trees don't mess up existing labels
+        # 递归的构造子树
         myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value),subLabels)
     return myTree                            
     
 def classify(inputTree,featLabels,testVec):
+    # 树的根结点
     firstStr = inputTree.keys()[0]
+    # 该根结点的子树
     secondDict = inputTree[firstStr]
+    # 根节点特征对应的位置
     featIndex = featLabels.index(firstStr)
+    # 传入的待测试样例的该位置的特征值
     key = testVec[featIndex]
     valueOfFeat = secondDict[key]
-    if isinstance(valueOfFeat, dict): 
+    # 判断到不到叶子结点
+    if isinstance(valueOfFeat, dict):
+        # 不是叶子结点，递归 
         classLabel = classify(valueOfFeat, featLabels, testVec)
+    # 到叶子结点了，那么就代表着分类结束了
     else: classLabel = valueOfFeat
     return classLabel
 

@@ -81,11 +81,14 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     for j in range(numIter):
         dataIndex = range(m)
         for i in range(m):
+            # 每次都调整 alpha
             alpha = 4/(1.0+j+i)+0.0001    #apha decreases with iteration, does not 
+            # 随机选取样本更新回归系数
             randIndex = int(random.uniform(0,len(dataIndex)))#go to 0 because of the constant
             h = sigmoid(sum(dataMatrix[randIndex]*weights))
             error = classLabels[randIndex] - h
             weights = weights + alpha * error * dataMatrix[randIndex]
+            # 删除已经使用过的样本
             del(dataIndex[randIndex])
     return weights
 
